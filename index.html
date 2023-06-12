@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redux</title>
+    <script src='./immer.umd.production.min.js' ></script>
+    <script src="./redux.min.js"></script>
+    <link rel='stylesheet' href='./css/style.css' />
+</head>
+<body>
+    <div>
+        <div>
+            <img id='flamengo' src='https://fla-bucket-s3-us.s3.amazonaws.com/public/arquivos/transparencia/94/1587236961055.png' />
+        </div>
+        <div id='form'>
+            <div id='style'></div>
+            <div id='display'>
+                <h3>Aluno:</h3>
+                <div id='alunoInfo'></div>
+            
+                <button id='incrementar'>Incrementar Dias</button>
+                <button id='reduzir'>Reduzir Dias</button>
+                <input type='email' id='input' placeholder='Novo E-mail' value='' />
+                <button id='modificar' >Alterar Email</button>
+
+                <h3>Informações:</h3>
+                <div id='informacao'></div> 
+                
+                <input type='number' id='inputNumber' placeholder='Informe o ID' value='' max='4' />
+                <button id='completarAula_aula'>Completar Aula</button>
+                <button id='complet'>Completar Curso</button>
+                <button id='reset'>Resetar Curso</button>
+            </div>
+            <div id='style-baixo'></div>
+        <div>
+    </div>
+
+    <script src='immer.umd.production.min.js'></script>
+    <script type='module'>
+        // Imports da aplicação
+        import store from './store/configureStore.js';
+        import { incrementarTempo, reduzirTempo, modificarEmail } from './store/aluno.js';
+        import { complet, completarAula, reset } from './store/aulas.js';
+        import trocarEmail from './components/trocarEmail.js';
+
+        // Parte responsável por renderizar o state da aplicação
+        function render() {
+            const { aluno: { nome, email, diasRestantes } } = store.getState();
+            const { aulas } = store.getState();
+
+            const alunoInfo = document.getElementById('alunoInfo');
+            const informacao = document.getElementById('informacao');
+
+            alunoInfo.innerHTML = `
+            <p>Nome: <span>${nome}</span></p>
+            <p>E-mail: <span>${email}</span></p>
+            <p>Dias Restantes: <span>${diasRestantes}</span></p>
+            `;
+
+            const renderizaInfo = informacao.innerHTML = aulas.map((aula) => {
+                return `
+                    <p>ID: <span>${aula.id}</span></p>
+                    <p>Nome: <span>${aula.nome}</span></p>
+                    <p>Situação da Aula: <span>${aula.completa ? 'Completa' : 'Incompleta'}</span></p>
+                `;
+            }).join('');
+            informacao.innerHTML = renderizaInfo;
+        };
+        render()
+
+        store.subscribe(render);
+
+        // Botões dispatch relacionados ao aluno
+        const incrementarBtn = document.getElementById('incrementar');
+        incrementarBtn.addEventListener('click', () => store.dispatch(incrementarTempo()));
+
+        const reduzirBtn = document.getElementById('reduzir');
+        reduzirBtn.addEventListener('click', () => store.dispatch(reduzirTempo()));
+
+        const emailModificarBtn = document.getElementById('modificar');
+        emailModificarBtn.addEventListener('click', () => trocarEmail());
+
+
+        // Botões dispatch relacionados as aulas
+        const aulaBtn = document.getElementById('completarAula_aula');
+        aulaBtn.addEventListener('click', () => {
+            const id = Number(document.getElementById('inputNumber').value);
+            store.dispatch(completarAula(id));
+        });
+
+        const completarBtn = document.getElementById('complet');
+        completarBtn.addEventListener('click', () => store.dispatch(complet()));
+        
+        const resetarBtn = document.getElementById('reset');
+        resetarBtn.addEventListener('click', () => store.dispatch(reset()));
+
+    </script>
+</body>
+</html>
